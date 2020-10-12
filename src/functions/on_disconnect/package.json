@@ -1,0 +1,17 @@
+{
+  "name": "presence-check",
+  "version": "1.0.0",
+  "description": "",
+  "main": "expire.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-appsync": "^4.0.1",
+    "graphql-tag": "^2.11.0",
+    "isomorphic-fetch": "^3.0.0"
+  },
+  "devDependencies": {}
+}

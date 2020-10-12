@@ -1,14 +1,6 @@
-# Welcome to your CDK TypeScript project!
+# Building a Presence API using Amazon AppSync, AWS Lambda and Amazon Elasticache
 
-This is a blank project for TypeScript development with CDK.
+When developing a video game, whether it is a single player or multiplayer one, social and competitive features have become  necessary to create a network effect and increase players' engagement. To implement those features, you will usually develop a backend that your players will connect to, and that you'll use to store players' data. To make the best usage of those social features, adding presence information will let players know which of their friends are currently online, to be able to challenge them quickly, or invite them for a game session. They might also want to be updated when those status change.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+In this post, I will expose a solution to build a Presence API using [AWS AppSync](https://aws.amazon.com/appsync), [AWS Lambda](https://aws.amazon.com/lambda) and [Amazon Elasticache](https://aws.amazon.com/elasticache).
 
-## Useful commands
-
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template

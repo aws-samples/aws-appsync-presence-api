@@ -1,0 +1,14 @@
+{
+  "name": "presence-layer",
+  "version": "1.0.0",
+  "description": "Layer for presence API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "chappo",
+  "license": "ISC",
+  "dependencies": {
+    "redis-cli": "^2.0.0"
+  }
+}
