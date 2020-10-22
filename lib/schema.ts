@@ -3,6 +3,7 @@
  * 
  */
 import * as AppSync from '@aws-cdk/aws-appsync';
+import { App } from '@aws-cdk/core';
 
 function typeFromObject( intermediateType: AppSync.IIntermediateType, options?: AppSync.GraphqlTypeOptions ) : AppSync.GraphqlType {
   return AppSync.GraphqlType.intermediate({ intermediateType, ...options });
@@ -24,7 +25,8 @@ export function PresenceSchema() : AppSync.Schema {
     definition: { 
       id: requiredId,
       status: requiredStatus
-    }
+    },
+    directives: [AppSync.Directive.iam(), AppSync.Directive.apiKey()]
   });
   const returnChange = typeFromObject(change);
   

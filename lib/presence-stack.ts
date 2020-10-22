@@ -64,9 +64,11 @@ export class PresenceStack extends CDK.Stack {
       securityGroups: [this.lambdaSG]
     });
     // All lambdas will require access to redis
-    useRedis && fn.addLayers(this.redisLayer);
-    fn.addEnvironment("REDIS_HOST", this.redisCluster.attrPrimaryEndPointAddress);
-    fn.addEnvironment("REDIS_PORT", this.redisCluster.attrPrimaryEndPointPort);
+    if (useRedis) {
+      fn.addLayers(this.redisLayer);
+      fn.addEnvironment("REDIS_HOST", this.redisCluster.attrPrimaryEndPointAddress);
+      fn.addEnvironment("REDIS_PORT", this.redisCluster.attrPrimaryEndPointPort);
+    }
     this.functions[name] = fn;
   };
 
@@ -223,7 +225,10 @@ export class PresenceStack extends CDK.Stack {
     const requestMappingTemplate = AppSync.MappingTemplate.fromString(`
       {
         "version": "2017-02-28",
-        "payload": $util.toJson($context.arguments.id)
+        "payload": {
+          "id": "$context.arguments.id",
+          "status": "offline"
+        }        
       }
     `);
     const responseMappingTemplate = AppSync.MappingTemplate.fromString(`
@@ -240,11 +245,10 @@ export class PresenceStack extends CDK.Stack {
      * 
      */
     const presenceBus = new AwsEvents.EventBus(this, "PresenceBus");
-    const timeoutFn = this.getFn("timeout");
     // Rule to trigger lambda check every minute
     new AwsEvents.Rule(this, "PresenceTimeoutRule", {
       schedule: AwsEvents.Schedule.cron({minute:"*"}),
-      targets: [new AwsEventsTargets.LambdaFunction(timeoutFn)],
+      targets: [new AwsEventsTargets.LambdaFunction(this.getFn("timeout"))],
       enabled: true // Set to true in production
     });
     // Rule for disconnection event
@@ -279,21 +283,28 @@ export class PresenceStack extends CDK.Stack {
      *  - Add the timeout
      *  - Configure triggering rule
      */
+    const allowEventBridge = new IAM.PolicyStatement({ effect: IAM.Effect.ALLOW });
+    allowEventBridge.addActions("events:PutEvents");
+    allowEventBridge.addResources(presenceBus.eventBusArn);
     
-    timeoutFn.addEnvironment("TIMEOUT", "10000");
-    timeoutFn.addEnvironment("EVENT_BUS", presenceBus.eventBusName);
-    const allowEventBrige = new IAM.PolicyStatement({ effect: IAM.Effect.ALLOW });
-    allowEventBrige.addActions("events:PutEvents");
-    allowEventBrige.addResources(presenceBus.eventBusArn);
-    timeoutFn.addToRolePolicy(allowEventBrige);
-    this.getFn('disconnect').addToRolePolicy(allowEventBrige);
+    this.getFn("timeout").addEnvironment("TIMEOUT", "10000")
+      .addEnvironment("EVENT_BUS", presenceBus.eventBusName)
+      .addToRolePolicy(allowEventBridge);
+    
+    this.getFn('disconnect')
+      .addEnvironment("EVENT_BUS", presenceBus.eventBusName)
+      .addToRolePolicy(allowEventBridge);
 
-    const onDisconnectFn = this.getFn("on_disconnect");
-    onDisconnectFn.addEnvironment("GRAPHQL_ENDPOINT", this.api.graphqlUrl);
+    this.getFn("heartbeat")
+      .addEnvironment("EVENT_BUS", presenceBus.eventBusName)
+      .addToRolePolicy(allowEventBridge);
+
     const allowAppsync = new IAM.PolicyStatement({ effect: IAM.Effect.ALLOW });
     allowAppsync.addActions("appsync:GraphQL");
-    allowAppsync.addResources(this.api.arn);
-    onDisconnectFn.addToRolePolicy(allowAppsync);
+    allowAppsync.addResources(this.api.arn + "/*");
+    this.getFn("on_disconnect")
+      .addEnvironment("GRAPHQL_ENDPOINT", this.api.graphqlUrl)
+      .addToRolePolicy(allowAppsync);
 
     /**
      * The CloudFormation stack output

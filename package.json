@@ -14,12 +14,13 @@
     "deploy": "npm run build && cdk deploy --profile gametech"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "^1.67.0",
+    "@aws-cdk/assert": "^1.68.0",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "@types/redis-mock": "^0.17.0",
-    "aws-cdk": "^1.67.0",
-    "jest": "^26.5.2",
+    "aws-cdk": "^1.68.0",
+    "aws-sdk": "^2.772.0",
+    "jest": "^26.5.3",
     "redis": "^3.0.2",
     "redis-mock": "^0.52.0",
     "ts-jest": "^26.4.1",
@@ -27,14 +28,14 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/aws-appsync": "^1.67.0",
-    "@aws-cdk/aws-ec2": "^1.67.0",
-    "@aws-cdk/aws-elasticache": "^1.67.0",
-    "@aws-cdk/aws-events": "^1.67.0",
-    "@aws-cdk/aws-events-targets": "^1.67.0",
-    "@aws-cdk/aws-iam": "^1.67.0",
-    "@aws-cdk/aws-lambda": "^1.67.0",
-    "@aws-cdk/core": "^1.67.0",
+    "@aws-cdk/aws-appsync": "^1.68.0",
+    "@aws-cdk/aws-ec2": "^1.68.0",
+    "@aws-cdk/aws-elasticache": "^1.68.0",
+    "@aws-cdk/aws-events": "^1.68.0",
+    "@aws-cdk/aws-events-targets": "^1.68.0",
+    "@aws-cdk/aws-iam": "^1.68.0",
+    "@aws-cdk/aws-lambda": "^1.68.0",
+    "@aws-cdk/core": "^1.68.0",
     "source-map-support": "^0.5.16"
   }
 }

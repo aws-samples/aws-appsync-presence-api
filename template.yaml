@@ -167,37 +167,6 @@ Resources:
         Ref: PresenceVPCLambdaSubnet2Subnet5C09EBC3
     Metadata:
       aws:cdk:path: PresenceStack/PresenceVPC/LambdaSubnet2/RouteTableAssociation
-  PresenceVPCeventsEndPointSecurityGroup2D9FF5D1:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: PresenceStack/PresenceVPC/eventsEndPoint/SecurityGroup
-      SecurityGroupEgress:
-        - CidrIp: 0.0.0.0/0
-          Description: Allow all outbound traffic by default
-          IpProtocol: "-1"
-      SecurityGroupIngress:
-        - CidrIp:
-            Fn::GetAtt:
-              - PresenceVPC5404FC46
-              - CidrBlock
-          Description:
-            Fn::Join:
-              - ""
-              - - "from "
-                - Fn::GetAtt:
-                    - PresenceVPC5404FC46
-                    - CidrBlock
-                - :443
-          FromPort: 443
-          IpProtocol: tcp
-          ToPort: 443
-      Tags:
-        - Key: Name
-          Value: PresenceStack/PresenceVPC
-      VpcId:
-        Ref: PresenceVPC5404FC46
-    Metadata:
-      aws:cdk:path: PresenceStack/PresenceVPC/eventsEndPoint/SecurityGroup/Resource
   PresenceVPCeventsEndPoint682C555D:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -212,7 +181,7 @@ Resources:
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - Fn::GetAtt:
-            - PresenceVPCeventsEndPointSecurityGroup2D9FF5D1
+            - eventsEndPointSG1AD6A545
             - GroupId
       SubnetIds:
         - Ref: PresenceVPCLambdaSubnet1Subnet99C81E1C
@@ -486,6 +455,23 @@ Resources:
               - :iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
     Metadata:
       aws:cdk:path: PresenceStack/disconnect/ServiceRole/Resource
+  disconnectServiceRoleDefaultPolicy43698ECC:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: events:PutEvents
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - PresenceBus5D952912
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: disconnectServiceRoleDefaultPolicy43698ECC
+      Roles:
+        - Ref: disconnectServiceRole372F5647
+    Metadata:
+      aws:cdk:path: PresenceStack/disconnect/ServiceRole/DefaultPolicy/Resource
   disconnect829B70D0:
     Type: AWS::Lambda::Function
     Properties:
@@ -532,6 +518,7 @@ Resources:
           - Ref: PresenceVPCLambdaSubnet1Subnet99C81E1C
           - Ref: PresenceVPCLambdaSubnet2Subnet5C09EBC3
     DependsOn:
+      - disconnectServiceRoleDefaultPolicy43698ECC
       - disconnectServiceRole372F5647
     Metadata:
       aws:cdk:path: PresenceStack/disconnect/Resource
@@ -582,7 +569,7 @@ Resources:
     Properties:
       Code:
         S3Bucket:
-          Ref: AssetParameters537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1S3Bucket8FF61718
+          Ref: AssetParametersa20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498S3BucketAFCFCDE9
         S3Key:
           Fn::Join:
             - ""
@@ -590,12 +577,12 @@ Resources:
                   - 0
                   - Fn::Split:
                       - "||"
-                      - Ref: AssetParameters537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1S3VersionKey0A1BDE98
+                      - Ref: AssetParametersa20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498S3VersionKeyF8B11B32
               - Fn::Select:
                   - 1
                   - Fn::Split:
                       - "||"
-                      - Ref: AssetParameters537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1S3VersionKey0A1BDE98
+                      - Ref: AssetParametersa20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498S3VersionKeyF8B11B32
       Handler: timeout.handler
       Role:
         Fn::GetAtt:
@@ -630,7 +617,7 @@ Resources:
       - timeoutServiceRole175F298C
     Metadata:
       aws:cdk:path: PresenceStack/timeout/Resource
-      aws:asset:path: asset.537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1
+      aws:asset:path: asset.a20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498
       aws:asset:property: Code
   timeoutAllowEventRulePresenceStackPresenceTimeoutRuleD3F99EA33C0FE864:
     Type: AWS::Lambda::Permission
@@ -687,7 +674,7 @@ Resources:
     Properties:
       Code:
         S3Bucket:
-          Ref: AssetParameters7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2S3Bucket56799C10
+          Ref: AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3Bucket3FF9FDB2
         S3Key:
           Fn::Join:
             - ""
@@ -695,12 +682,12 @@ Resources:
                   - 0
                   - Fn::Split:
                       - "||"
-                      - Ref: AssetParameters7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2S3VersionKey8973615D
+                      - Ref: AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3VersionKeyC4F1FB88
               - Fn::Select:
                   - 1
                   - Fn::Split:
                       - "||"
-                      - Ref: AssetParameters7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2S3VersionKey8973615D
+                      - Ref: AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3VersionKeyC4F1FB88
       Handler: on_disconnect.handler
       Role:
         Fn::GetAtt:
@@ -726,7 +713,7 @@ Resources:
       - ondisconnectServiceRoleC1A63C53
     Metadata:
       aws:cdk:path: PresenceStack/on_disconnect/Resource
-      aws:asset:path: asset.7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2
+      aws:asset:path: asset.9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacde
       aws:asset:property: Code
   ondisconnectAllowEventRulePresenceStackPresenceDisconnectRuleA03863F863D0B9BB:
     Type: AWS::Lambda::Permission
@@ -795,7 +782,7 @@ Resources:
           offline
         }
 
-        type Change {
+        type Change @aws_iam @aws_api_key {
           id: ID!
           status: Status!
         }
@@ -1068,7 +1055,13 @@ Resources:
 
         \        \"version\": \"2017-02-28\",
 
-        \        \"payload\": $util.toJson($context.arguments.id)
+        \        \"payload\": {
+
+        \          \"id\": \"$context.arguments.id\",
+
+        \          \"status\": \"offline\"
+
+        \        }       \ 
 
         \      }
 
@@ -1122,10 +1115,55 @@ Resources:
           Id: Target0
     Metadata:
       aws:cdk:path: PresenceStack/PresenceDisconnectRule/Resource
+  eventsEndPointSG1AD6A545:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EventBrige interface endpoint SG
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      SecurityGroupIngress:
+        - CidrIp:
+            Fn::GetAtt:
+              - PresenceVPC5404FC46
+              - CidrBlock
+          Description:
+            Fn::Join:
+              - ""
+              - - "from "
+                - Fn::GetAtt:
+                    - PresenceVPC5404FC46
+                    - CidrBlock
+                - :443
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      VpcId:
+        Ref: PresenceVPC5404FC46
+    Metadata:
+      aws:cdk:path: PresenceStack/eventsEndPointSG/Resource
+  eventsEndPointSGfromPresenceStacklambdaSgDAB0B1E280635940B3:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      Description: from PresenceStacklambdaSgDAB0B1E2:80
+      FromPort: 80
+      GroupId:
+        Fn::GetAtt:
+          - eventsEndPointSG1AD6A545
+          - GroupId
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+          - lambdaSgD8D93E20
+          - GroupId
+      ToPort: 80
+    Metadata:
+      aws:cdk:path: PresenceStack/eventsEndPointSG/from PresenceStacklambdaSgDAB0B1E2:80
   CDKMetadata:
     Type: AWS::CDK::Metadata
     Properties:
-      Modules: aws-cdk=1.67.0,@aws-cdk/assets=1.67.0,@aws-cdk/aws-applicationautoscaling=1.67.0,@aws-cdk/aws-appsync=1.67.0,@aws-cdk/aws-autoscaling=1.67.0,@aws-cdk/aws-autoscaling-common=1.67.0,@aws-cdk/aws-autoscaling-hooktargets=1.67.0,@aws-cdk/aws-cloudwatch=1.67.0,@aws-cdk/aws-codeguruprofiler=1.67.0,@aws-cdk/aws-ec2=1.67.0,@aws-cdk/aws-ecr=1.67.0,@aws-cdk/aws-ecr-assets=1.67.0,@aws-cdk/aws-ecs=1.67.0,@aws-cdk/aws-elasticache=1.67.0,@aws-cdk/aws-elasticloadbalancingv2=1.67.0,@aws-cdk/aws-events=1.67.0,@aws-cdk/aws-events-targets=1.67.0,@aws-cdk/aws-iam=1.67.0,@aws-cdk/aws-kms=1.67.0,@aws-cdk/aws-lambda=1.67.0,@aws-cdk/aws-logs=1.67.0,@aws-cdk/aws-s3=1.67.0,@aws-cdk/aws-s3-assets=1.67.0,@aws-cdk/aws-servicediscovery=1.67.0,@aws-cdk/aws-sns=1.67.0,@aws-cdk/aws-sns-subscriptions=1.67.0,@aws-cdk/aws-sqs=1.67.0,@aws-cdk/aws-ssm=1.67.0,@aws-cdk/cloud-assembly-schema=1.67.0,@aws-cdk/core=1.67.0,@aws-cdk/custom-resources=1.67.0,@aws-cdk/cx-api=1.67.0,@aws-cdk/region-info=1.67.0,jsii-runtime=node.js/v12.16.3
+      Modules: aws-cdk=1.68.0,@aws-cdk/assets=1.68.0,@aws-cdk/aws-applicationautoscaling=1.68.0,@aws-cdk/aws-appsync=1.68.0,@aws-cdk/aws-autoscaling=1.68.0,@aws-cdk/aws-autoscaling-common=1.68.0,@aws-cdk/aws-autoscaling-hooktargets=1.68.0,@aws-cdk/aws-cloudwatch=1.68.0,@aws-cdk/aws-codeguruprofiler=1.68.0,@aws-cdk/aws-ec2=1.68.0,@aws-cdk/aws-ecr=1.68.0,@aws-cdk/aws-ecr-assets=1.68.0,@aws-cdk/aws-ecs=1.68.0,@aws-cdk/aws-elasticache=1.68.0,@aws-cdk/aws-elasticloadbalancingv2=1.68.0,@aws-cdk/aws-events=1.68.0,@aws-cdk/aws-events-targets=1.68.0,@aws-cdk/aws-iam=1.68.0,@aws-cdk/aws-kms=1.68.0,@aws-cdk/aws-lambda=1.68.0,@aws-cdk/aws-logs=1.68.0,@aws-cdk/aws-s3=1.68.0,@aws-cdk/aws-s3-assets=1.68.0,@aws-cdk/aws-servicediscovery=1.68.0,@aws-cdk/aws-sns=1.68.0,@aws-cdk/aws-sns-subscriptions=1.68.0,@aws-cdk/aws-sqs=1.68.0,@aws-cdk/aws-ssm=1.68.0,@aws-cdk/cloud-assembly-schema=1.68.0,@aws-cdk/core=1.68.0,@aws-cdk/custom-resources=1.68.0,@aws-cdk/cx-api=1.68.0,@aws-cdk/region-info=1.68.0,jsii-runtime=node.js/v12.16.3
     Metadata:
       aws:cdk:path: PresenceStack/CDKMetadata/Default
     Condition: CDKMetadataAvailable
@@ -1166,24 +1204,24 @@ Parameters:
   AssetParameters54936929c763051376e12ee4766e5af7e5cdc8b7857cd3e4189712ed96b62800ArtifactHash49126304:
     Type: String
     Description: Artifact hash for asset "54936929c763051376e12ee4766e5af7e5cdc8b7857cd3e4189712ed96b62800"
-  AssetParameters537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1S3Bucket8FF61718:
+  AssetParametersa20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498S3BucketAFCFCDE9:
     Type: String
-    Description: S3 bucket for asset "537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1"
-  AssetParameters537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1S3VersionKey0A1BDE98:
+    Description: S3 bucket for asset "a20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498"
+  AssetParametersa20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498S3VersionKeyF8B11B32:
     Type: String
-    Description: S3 key for asset version "537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1"
-  AssetParameters537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1ArtifactHash26EAE26F:
+    Description: S3 key for asset version "a20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498"
+  AssetParametersa20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498ArtifactHashF4A697D7:
     Type: String
-    Description: Artifact hash for asset "537bc1f07cdb43f8dcf078d5303b11342ceeb8278740a5375b1829c657bd00f1"
-  AssetParameters7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2S3Bucket56799C10:
+    Description: Artifact hash for asset "a20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498"
+  AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3Bucket3FF9FDB2:
     Type: String
-    Description: S3 bucket for asset "7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2"
-  AssetParameters7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2S3VersionKey8973615D:
+    Description: S3 bucket for asset "9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacde"
+  AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3VersionKeyC4F1FB88:
     Type: String
-    Description: S3 key for asset version "7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2"
-  AssetParameters7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2ArtifactHashCA8C4B4B:
+    Description: S3 key for asset version "9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacde"
+  AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeArtifactHashF4D4113C:
     Type: String
-    Description: Artifact hash for asset "7ce6da14d563ae6042d483ac52d773c07e56390663a98e0783c050401718dbe2"
+    Description: Artifact hash for asset "9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacde"
 Outputs:
   presenceapi:
     Description: Presence api endpoint
