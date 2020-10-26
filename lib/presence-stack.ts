@@ -13,9 +13,9 @@ import * as AwsEventsTargets from '@aws-cdk/aws-events-targets';
 
 // Local imports
 import { PresenceSchema } from './schema';
-import { InterfaceVpcEndpointAwsService } from "@aws-cdk/aws-ec2";
 
 // Interface used as parameter to create resolvers for our API
+// @see function createResolver
 interface ResolverOptions {
   source: string | AppSync.BaseDataSource,
   requestMappingTemplate?: AppSync.MappingTemplate,
@@ -40,16 +40,17 @@ export class PresenceStack extends CDK.Stack {
   /**
    * Adds a Lambda Function to an internal list of functions indexed by their name.
    * The function code is assumed to be located in a subfolder related to that name 
-   * and using `name.js` file as entry point.
+   * and using `${name}.js` file as entry point.
    * 
-   * All functions are using the "Redis Layer", containing a node module for Redis access,
-   * as well as environment variables to access the Redis cluster.
+   * Functions that require access to redis will have the "Redis Layer" attached,
+   * containing a node module for Redis access, be placed inside the VPC,
+   * and have environment variables set to access the Redis cluster.
    * 
    * The CDK Lambda.Code construct takes care of bundling the code (including local modules if any),
-   * uploading it as Asset to S3.
+   * and uploading it as Asset to S3.
    * 
    * @param name string: the name given to the function
-   * @param useRedids boolean: whether the lambda uses redis or not, so it requires the layer and be in the VPC
+   * @param useRedis boolean: whether the lambda uses redis or not, so it requires the layer and be in the VPC
    */
   private addFunction(name: string, useRedis: boolean = true) : void {
     const props = useRedis ? {
@@ -63,12 +64,13 @@ export class PresenceStack extends CDK.Stack {
       handler: `${name}.handler`,
       securityGroups: [this.lambdaSG]
     });
-    // All lambdas will require access to redis
+    // Specific elements to add for redis access
     if (useRedis) {
       fn.addLayers(this.redisLayer);
       fn.addEnvironment("REDIS_HOST", this.redisCluster.attrPrimaryEndPointAddress);
       fn.addEnvironment("REDIS_PORT", this.redisCluster.attrPrimaryEndPointPort);
     }
+    // Store the function for further needs
     this.functions[name] = fn;
   };
 
@@ -82,14 +84,16 @@ export class PresenceStack extends CDK.Stack {
   };
 
   /**
-   * Helper function to create a resolver. A resolver attaches a Data Source to a specific field
-   * in the schema. 
+   * Helper function to create a resolver.
    * 
+   * A resolver attaches a Data Source to a specific field in the schema. 
    * The ResolverOptions might also include request mapping and response mapping templates
+   * It returns the attached DataSource for possible reuse.
    * 
-   * @param typeName 
-   * @param fieldName 
+   * @param typeName the type (e.g. Query, Mutation or any other type)
+   * @param fieldName the resolvable fields
    * @param options ResolverOptions
+   * @returns AppSync.BaseDataSource
    */
   private createResolver(typeName: string, fieldName: string, options: ResolverOptions)
     : AppSync.BaseDataSource {
@@ -114,10 +118,10 @@ export class PresenceStack extends CDK.Stack {
      * Network:
      * 
      * Here we define a VPC with two subnet groups.
-     * The CDK automatically creates subnets in 3 different AZs by default
+     * The CDK automatically creates subnets in at least 2 AZs by default
      * You can change the behavior using the `maxAzs` parameter.
      * 
-     * Subnet types:
+     * Subnet types can be:
      * - ISOLATED to make sure the Redis Cluster is secured
      * - PRIVATE: used for the lambda function accessing Redis Cluster
      * - PUBLIC: required to add a Nat Gateway for Lambda to access AppSync.
@@ -140,6 +144,7 @@ export class PresenceStack extends CDK.Stack {
         }
       ]
     });
+
     // Add two different security groups:
     // One for the redis cluster, one for the lambda function.
     // This is to allow traffic only from our functions to the redis cluster
@@ -183,7 +188,8 @@ export class PresenceStack extends CDK.Stack {
 
     /**
      * Lambda functions
-     * - Layer to add nodejs redis module
+     * - Define the layer to add nodejs redis module
+     * - Add the functions
      */
     this.redisLayer = new Lambda.LayerVersion(this, "redisModule", {
       code: Lambda.Code.fromAsset(path.join(__dirname, '../src/layer/')),
@@ -191,15 +197,17 @@ export class PresenceStack extends CDK.Stack {
       layerVersionName: "presenceLayer"
     });
     // Use arrow function to keep "this" scope
-    ['heartbeat','status','disconnect','timeout'].forEach((fn) => { this.addFunction(fn); });
-    // On disconnect function is outside the VPC
+    ['heartbeat','status','disconnect','timeout'].forEach(
+      (fn) => { this.addFunction(fn); }
+    );
+    // On disconnect function does not require access to redis
     this.addFunction("on_disconnect", false);
     
     /**
      * The GraphQL API
      * 
      * Default authorization is set to use API_KEY. This is good for development and test,
-     * in production, I would recommend using a COGNITO user based authentification.
+     * in production, I would recommend using a COGNITO or OPEN_ID user based authentification.
      */
     this.api = new AppSync.GraphqlApi(this, "PresenceAPI", {
       name: "PresenceAPI",
@@ -220,7 +228,9 @@ export class PresenceStack extends CDK.Stack {
     this.createResolver("Query", "status", {source: "status"});
     this.createResolver("Mutation", "connect", {source: heartbeatDS} );
     this.createResolver("Mutation", "disconnect", {source: "disconnect"} );
-    // None data source for list disconnection
+    // The "disconnected" mutation is called on disconnection, and
+    // is the one AppSync client will subscribe too.
+    // It therefore uses a None DataSource
     const noneDS = this.api.addNoneDataSource("disconnectedDS");
     const requestMappingTemplate = AppSync.MappingTemplate.fromString(`
       {
@@ -243,15 +253,18 @@ export class PresenceStack extends CDK.Stack {
     /**
      * Event bus
      * 
+     * We could use the Default Bus with EventBridge, but a custom bus
+     * is interesting for further extensions.
      */
     const presenceBus = new AwsEvents.EventBus(this, "PresenceBus");
-    // Rule to trigger lambda check every minute
+    // Rule to trigger lambda timeout every minute
     new AwsEvents.Rule(this, "PresenceTimeoutRule", {
       schedule: AwsEvents.Schedule.cron({minute:"*"}),
       targets: [new AwsEventsTargets.LambdaFunction(this.getFn("timeout"))],
       enabled: true // Set to true in production
     });
-    // Rule for disconnection event
+    // Rule for disconnection event: triggers the on_disconnect
+    // lambda function, according to the given pattern
     new AwsEvents.Rule(this, "PresenceDisconnectRule", {
       eventBus: presenceBus,
       description: "Rule for presence disconnection",
@@ -262,14 +275,15 @@ export class PresenceStack extends CDK.Stack {
       targets: [new AwsEventsTargets.LambdaFunction(this.getFn("on_disconnect"))],
       enabled: true
     });
-    // Add an interface endpoint for EventBus
+    // Add an interface endpoint for EventBridge: this allow
+    // the lambda inside the VPC to call EventBridge without requiring a NAT Gateway
     const eventsEndPointSG = new EC2.SecurityGroup(this, "eventsEndPointSG", {
       vpc: this.vpc,
       description: "EventBrige interface endpoint SG"
     });
     eventsEndPointSG.addIngressRule(this.lambdaSG, EC2.Port.tcp(80));
     this.vpc.addInterfaceEndpoint("eventsEndPoint", {
-      service: InterfaceVpcEndpointAwsService.CLOUDWATCH_EVENTS,
+      service: EC2.InterfaceVpcEndpointAwsService.CLOUDWATCH_EVENTS,
       subnets: this.vpc.selectSubnets({subnetGroupName: "Lambda"}),
       securityGroups: [eventsEndPointSG]
     });
@@ -309,7 +323,7 @@ export class PresenceStack extends CDK.Stack {
     /**
      * The CloudFormation stack output
      * 
-     * Display the redis cache endpoints
+     * Display the AppSync endpoint
      */
     new CDK.CfnOutput(this, "presence-api", {
       value: this.api.graphqlUrl,

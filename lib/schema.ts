@@ -1,26 +1,42 @@
 /**
  * AppSync schema code first definition.
  * 
+ * See [Code-First Schema](https://docs.aws.amazon.com/cdk/api/latest/docs/aws-appsync-readme.html#code-first-schema)
  */
 import * as AppSync from '@aws-cdk/aws-appsync';
-import { App } from '@aws-cdk/core';
 
+/**
+ * Helper function to define a GraphQl Type from an intermediate type.
+ * 
+ * @param intermediateType the intermediate type this type derives from
+ * @param options options like isRequired, isList, isRequiredList
+ */
 function typeFromObject( intermediateType: AppSync.IIntermediateType, options?: AppSync.GraphqlTypeOptions ) : AppSync.GraphqlType {
   return AppSync.GraphqlType.intermediate({ intermediateType, ...options });
 }
 
+/**
+ * Function called to return the schema
+ * 
+ * @returns AppSync.Schema 
+ */
 export function PresenceSchema() : AppSync.Schema {
 
+  // Instantiate the schema
   const schema = new AppSync.Schema();
 
-  // Types helpers
+  // A Required ID type ("ID!")
   const requiredId = AppSync.GraphqlType.id({isRequired: true});
 
-  // User defined types
+  // User defined types: enum for presence state, and required version
   const status = new AppSync.EnumType("Status", {
     definition: ["online", "offline"]
   });
   const requiredStatus = typeFromObject(status, {isRequired: true});
+  // Main type returned by API calls:
+  // Directives are used to set access through IAM and API KEY
+  // In production, recommendation would be to use Cognito or Open Id
+  // (https://docs.aws.amazon.com/appsync/latest/devguide/security.html)
   const change = new AppSync.ObjectType("Change", {
     definition: { 
       id: requiredId,
@@ -44,7 +60,7 @@ export function PresenceSchema() : AppSync.Schema {
     args: { id: requiredId }
   }));
 
-  // Add mutation
+  // Add mutations
   schema.addMutation("connect", new AppSync.ResolvableField({
     returnType: returnChange,
     args: { id: requiredId }
@@ -67,5 +83,4 @@ export function PresenceSchema() : AppSync.Schema {
   }));
 
   return schema;
-
 };

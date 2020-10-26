@@ -54,7 +54,7 @@ The infrastructure is defined using [AWS Cloud Development Kit](https://aws.amaz
 Elasticache Redis Cluster are deployed within an Amazon VPC. As seen in the diagram, this VPC is divided into three subnet groups:
 - the **Redis** subnet group: fully private for the cluster deployment
 - the **Lambda** subnet group: in order to access the Redis endpoints, the lambdas functions have to be deployed inside the same VPC.
-- a **public** subnet group: the `timeout`lambda function requires access to the AppSync endpoint to call mutations. As of today, AWS AppSync does not provide [private link](https://aws.amazon.com/fr/privatelink/), so the function has to access AppSync through a [NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html), which in turn requires public subnets.
+- a **public** subnet group: the `timeout` lambda function requires access to the AppSync endpoint to call mutations. As of today, AWS AppSync does not provide [private link](https://aws.amazon.com/fr/privatelink/), so the function has to access AppSync through a [NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html), which in turn requires public subnets.
 
 For high availability, we use a multi-AZ (Availability Zone) deployment, which requires definitions for one subnet ressource per AZ and group in our stack, as well as a route table to handle traffic from the Lambda subnets to the internet. Fortunately, this is where AWS CDK comes in handy with the `Vpc`construct:
 ```typescript

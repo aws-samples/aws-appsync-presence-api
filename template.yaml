@@ -307,12 +307,29 @@ Resources:
               - :iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
     Metadata:
       aws:cdk:path: PresenceStack/heartbeat/ServiceRole/Resource
+  heartbeatServiceRoleDefaultPolicy2B328071:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: events:PutEvents
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - PresenceBus5D952912
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: heartbeatServiceRoleDefaultPolicy2B328071
+      Roles:
+        - Ref: heartbeatServiceRoleD63C9062
+    Metadata:
+      aws:cdk:path: PresenceStack/heartbeat/ServiceRole/DefaultPolicy/Resource
   heartbeat8A8E5472:
     Type: AWS::Lambda::Function
     Properties:
       Code:
         S3Bucket:
-          Ref: AssetParameters355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1S3Bucket59312955
+          Ref: AssetParametersf079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215S3BucketE31386F4
         S3Key:
           Fn::Join:
             - ""
@@ -320,12 +337,12 @@ Resources:
                   - 0
                   - Fn::Split:
                       - "||"
-                      - Ref: AssetParameters355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1S3VersionKeyF2D40C2A
+                      - Ref: AssetParametersf079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215S3VersionKey4A53E7DC
               - Fn::Select:
                   - 1
                   - Fn::Split:
                       - "||"
-                      - Ref: AssetParameters355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1S3VersionKeyF2D40C2A
+                      - Ref: AssetParametersf079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215S3VersionKey4A53E7DC
       Handler: heartbeat.handler
       Role:
         Fn::GetAtt:
@@ -342,6 +359,8 @@ Resources:
             Fn::GetAtt:
               - PresenceCluster
               - PrimaryEndPoint.Port
+          EVENT_BUS:
+            Ref: PresenceBus5D952912
       Layers:
         - Ref: redisModule3972F6F0
       VpcConfig:
@@ -353,10 +372,11 @@ Resources:
           - Ref: PresenceVPCLambdaSubnet1Subnet99C81E1C
           - Ref: PresenceVPCLambdaSubnet2Subnet5C09EBC3
     DependsOn:
+      - heartbeatServiceRoleDefaultPolicy2B328071
       - heartbeatServiceRoleD63C9062
     Metadata:
       aws:cdk:path: PresenceStack/heartbeat/Resource
-      aws:asset:path: asset.355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1
+      aws:asset:path: asset.f079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215
       aws:asset:property: Code
   statusServiceRole987113E6:
     Type: AWS::IAM::Role
@@ -507,6 +527,8 @@ Resources:
             Fn::GetAtt:
               - PresenceCluster
               - PrimaryEndPoint.Port
+          EVENT_BUS:
+            Ref: PresenceBus5D952912
       Layers:
         - Ref: redisModule3972F6F0
       VpcConfig:
@@ -660,9 +682,12 @@ Resources:
           - Action: appsync:GraphQL
             Effect: Allow
             Resource:
-              Fn::GetAtt:
-                - PresenceAPI097D0E1D
-                - Arn
+              Fn::Join:
+                - ""
+                - - Fn::GetAtt:
+                      - PresenceAPI097D0E1D
+                      - Arn
+                  - /*
         Version: "2012-10-17"
       PolicyName: ondisconnectServiceRoleDefaultPolicy4D06E5F1
       Roles:
@@ -674,7 +699,7 @@ Resources:
     Properties:
       Code:
         S3Bucket:
-          Ref: AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3Bucket3FF9FDB2
+          Ref: AssetParameters235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294S3Bucket046467FD
         S3Key:
           Fn::Join:
             - ""
@@ -682,12 +707,12 @@ Resources:
                   - 0
                   - Fn::Split:
                       - "||"
-                      - Ref: AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3VersionKeyC4F1FB88
+                      - Ref: AssetParameters235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294S3VersionKey38A1484A
               - Fn::Select:
                   - 1
                   - Fn::Split:
                       - "||"
-                      - Ref: AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3VersionKeyC4F1FB88
+                      - Ref: AssetParameters235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294S3VersionKey38A1484A
       Handler: on_disconnect.handler
       Role:
         Fn::GetAtt:
@@ -696,14 +721,6 @@ Resources:
       Runtime: nodejs12.x
       Environment:
         Variables:
-          REDIS_HOST:
-            Fn::GetAtt:
-              - PresenceCluster
-              - PrimaryEndPoint.Address
-          REDIS_PORT:
-            Fn::GetAtt:
-              - PresenceCluster
-              - PrimaryEndPoint.Port
           GRAPHQL_ENDPOINT:
             Fn::GetAtt:
               - PresenceAPI097D0E1D
@@ -713,7 +730,7 @@ Resources:
       - ondisconnectServiceRoleC1A63C53
     Metadata:
       aws:cdk:path: PresenceStack/on_disconnect/Resource
-      aws:asset:path: asset.9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacde
+      aws:asset:path: asset.235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294
       aws:asset:property: Code
   ondisconnectAllowEventRulePresenceStackPresenceDisconnectRuleA03863F863D0B9BB:
     Type: AWS::Lambda::Permission
@@ -1177,15 +1194,15 @@ Parameters:
   AssetParameters063deca7b10324b4189c00499277536cd3841b65d793fd398c5d9091b62cdf8dArtifactHash8F248323:
     Type: String
     Description: Artifact hash for asset "063deca7b10324b4189c00499277536cd3841b65d793fd398c5d9091b62cdf8d"
-  AssetParameters355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1S3Bucket59312955:
+  AssetParametersf079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215S3BucketE31386F4:
     Type: String
-    Description: S3 bucket for asset "355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1"
-  AssetParameters355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1S3VersionKeyF2D40C2A:
+    Description: S3 bucket for asset "f079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215"
+  AssetParametersf079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215S3VersionKey4A53E7DC:
     Type: String
-    Description: S3 key for asset version "355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1"
-  AssetParameters355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1ArtifactHashCA43296F:
+    Description: S3 key for asset version "f079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215"
+  AssetParametersf079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215ArtifactHashF42E207F:
     Type: String
-    Description: Artifact hash for asset "355cfaef1e07e1e370acf9919f7b5426860a001a154b89d944952b4542ee16d1"
+    Description: Artifact hash for asset "f079b2a4c6da4d3ca9c671dd8e2e2fdebca4a20d23620bff5a7812a6c937f215"
   AssetParameterse7c2e97bcd4582228ec8dd10da4dc5d4e849bc46db1d10dca6f1d193fb37313bS3BucketF76B34D0:
     Type: String
     Description: S3 bucket for asset "e7c2e97bcd4582228ec8dd10da4dc5d4e849bc46db1d10dca6f1d193fb37313b"
@@ -1213,15 +1230,15 @@ Parameters:
   AssetParametersa20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498ArtifactHashF4A697D7:
     Type: String
     Description: Artifact hash for asset "a20088857f6e015bad4248587ee105bbbed6216b24d6b7609aadfa6eb79b8498"
-  AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3Bucket3FF9FDB2:
+  AssetParameters235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294S3Bucket046467FD:
     Type: String
-    Description: S3 bucket for asset "9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacde"
-  AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeS3VersionKeyC4F1FB88:
+    Description: S3 bucket for asset "235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294"
+  AssetParameters235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294S3VersionKey38A1484A:
     Type: String
-    Description: S3 key for asset version "9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacde"
-  AssetParameters9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacdeArtifactHashF4D4113C:
+    Description: S3 key for asset version "235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294"
+  AssetParameters235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294ArtifactHash0AF8559A:
     Type: String
-    Description: Artifact hash for asset "9f15351aa98de48d45b45b10b992a4d688bf694d48101209163fb9d2f68bacde"
+    Description: Artifact hash for asset "235b434184d8caa60ac353836c86e279be6b7d85ff9264ce2b0e849ab7e6f294"
 Outputs:
   presenceapi:
     Description: Presence api endpoint
