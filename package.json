@@ -7,11 +7,11 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
-    "test-stack": "npm run build && jest stack",
-    "test-fn": "npm run build && jest functions",
+    "test": "tsc && jest",
+    "test-stack": "tsc && jest stack",
+    "test-fn": "tsc && jest functions",
     "cdk": "cdk",
-    "deploy": "npm run build && cdk deploy --profile gametech"
+    "deploy": "tsc && cdk deploy --profile gametech"
   },
   "devDependencies": {
     "@aws-cdk/assert": "^1.68.0",

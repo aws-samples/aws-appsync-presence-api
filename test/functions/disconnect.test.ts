@@ -1,8 +1,9 @@
 import { promisify } from "util";
-
+import * as AWS from "../mocks/aws-sdk";
 const redis = require('redis-mock');
 const disconnect = require("../../src/functions/disconnect/disconnect");
 jest.mock('redis', () => redis);
+jest.mock('aws-sdk', () => AWS);
 
 describe("Disconnect function", () => {
   test("Exports an handler function", () => {
@@ -35,6 +36,7 @@ describe("Disconnect function", () => {
   describe("Disconnected saved", () => {
     const testMember = "test_disconnect";
     const client = redis.createClient();
+    const events = new AWS.EventBridge();
     // Make sure key is not set
     const zscore = promisify(client.zscore).bind(client);
     const zadd = promisify(client.zadd).bind(client);
@@ -44,6 +46,7 @@ describe("Disconnect function", () => {
     test("Disconnnect already offline", async () => {
       await expect(disconnect.handler({arguments: {id: testMember}}))
         .resolves.toMatchObject({id: testMember, status: "offline"});
+      expect(events.putEvents).not.toHaveBeenCalled();
     });
     test("Set score", async () => {
       await expect(zadd("presence", 1234, testMember)).resolves.toBe(1);
@@ -51,6 +54,15 @@ describe("Disconnect function", () => {
     test("Disconnnect returns offline", async () => {
       await expect(disconnect.handler({arguments: {id: testMember}}))
         .resolves.toMatchObject({id: testMember, status: "offline"});
+    });
+    test("Disconnected event sent", () => {
+      expect(events.putEvents).toHaveBeenCalledTimes(1);
+      expect(events.putEvents).toHaveBeenCalledWith({
+        "Entries": [expect.objectContaining({
+          "DetailType":"presence.disconnected",
+          "Detail": JSON.stringify({id: testMember})
+        })]
+      });
     });
     test("ZSCORE removed", async () => {
       await expect(zscore("presence", testMember)).resolves.toBeNull();

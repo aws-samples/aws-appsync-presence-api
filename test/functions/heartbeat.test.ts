@@ -1,7 +1,9 @@
 import { promisify } from "util";
-const redis = require('redis-mock');
+import * as AWS from "../mocks/aws-sdk";
+const redis = require("redis-mock");
 const heartbeat = require("../../src/functions/heartbeat/heartbeat");
 jest.mock('redis', () => redis);
+jest.mock('aws-sdk', () => AWS);
 
 describe("Heartbeat function", () => {
   test("Exports an handler function", () => {
@@ -34,14 +36,25 @@ describe("Heartbeat function", () => {
   describe("Heartbeat saved", () => {
     const testMember = "test_heartbeat";
     const client = redis.createClient();
+    const events = new AWS.EventBridge();
     // Make sure key is not set
     const zscore = promisify(client.zscore).bind(client);
     test("ZSCORE not set", async () => {
       await expect(zscore("presence", testMember)).resolves.toBe(null);
     });
     test("Heartbeat return", async () => {
+      events.putEvents.mockClear();
       await expect(heartbeat.handler({arguments: {id: testMember}}))
         .resolves.toMatchObject({id: testMember, status: "online"});
+    });
+    test("Check EventBridge call", () => {
+      expect(events.putEvents).toHaveBeenCalledTimes(1);
+      expect(events.putEvents).toHaveBeenCalledWith({
+        "Entries": [expect.objectContaining({
+          "DetailType":"presence.connected",
+          "Detail": JSON.stringify({id: testMember})
+        })]
+      });
     });
     let stamp: number;
     test("ZSCORE set", async () => {
@@ -51,8 +64,12 @@ describe("Heartbeat function", () => {
       stamp = parseInt(result);
     });
     test("Heartbeat still online", async () => {
+      events.putEvents.mockClear();
       await expect(heartbeat.handler({arguments: {id: testMember}}))
         .resolves.toMatchObject({id: testMember, status: "online"});
+    });
+    test("Heartbeat update: no events sent", () => {
+      expect(events.putEvents).not.toHaveBeenCalled();
     });
     test("ZSCORE updated", async () => {
       const result = await zscore("presence", testMember);

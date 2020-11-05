@@ -13,7 +13,7 @@ For this example, we will keep the API as simple as possible. Each player will b
 * `disconnect` **mutation**: to be called when the player gracefully quits the game (and closes her connection)
 * `status` **query**: to retrieve the current status of one player
 
-There is one additionnal and more elaborate use case. The player can be disconnected from the backend for different reasons: client crashes, network interruptions, or even intentionnally to cheat. Still, we want other players to be informed of the disconnection even when the `disconnect` operation is not called. To do so, the game client sends regular signals to the backend, called `heartbeat`, and a threshold (or timeout) is set to consider if the player is still online or not. As game clients perform reconnection attempts when disconnected, it's important to carefully define both the heartbeat interval and the threshold to avoid the blinking player effect, whose status would switch quickly from connected to disconnected. 
+There is one additional and more elaborate use case. The player can be disconnected from the backend for different reasons: client crashes, network interruptions, or even intentionnally to cheat. Still, we want other players to be informed of the disconnection even when the `disconnect` operation is not called. To do so, the game client sends regular signals to the backend, called `heartbeat`, and a threshold (or timeout) is set to consider if the player is still online or not. As game clients perform reconnection attempts when disconnected, it's important to carefully define both the heartbeat interval and the threshold to avoid the blinking player effect, whose status would switch quickly from connected to disconnected. 
 
 Finally, we will have some **subscriptions** added to our API for players to receive notifications when another player's status changes. The `@aws_subscribe` annotation is specific to AWS AppSync and specify the mutations that will trigger the notification. The final schema of the AWS AppSync looks like this:   
 ```graphql
@@ -120,7 +120,7 @@ The `ZADD` redis command can both add a new entry in the set, or update the entr
 If you look at the CDK code that creates the resolvers or datasources, there is nothing related to the creation of IAM role to give permissions to AppSync to call the functions: this is also automatically handled by the CDK constructs.
 
 ### Handling expired connection
-The process of handling expired connection follows the steps annonatated in the above diagram:
+The process of handling expired connection follows the steps annotated in the above diagram:
 1. Triggered at regular intervals, the `timeout` function retrieves expired connections and remove them from the sorted set
 2. It performs one AppSync `disconnected` **mutation** per disconnection through the NAT Gateway
 3. AppSync triggers notification for each disconnection to inform subscribed players
@@ -196,10 +196,10 @@ exports.handler =  async function() {
 }
 ```
 
-Finally, to trigger notification in AppSync, we use a specific **mutation** named `disconnected`. This mutation is attached to a [local resolver](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-local-resolvers.html): it just forward the result of the request mapping template to the response mapping template, without leaving AppSync, while triggering notifications to subscribed clients. 
+Finally, in order to trigger notification in AppSync, we use a specific **mutation** named `disconnected`. This mutation is attached to a [local resolver](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-local-resolvers.html): it just forward the result of the request mapping template to the response mapping template, without leaving AppSync, while triggering notifications to subscribed clients. 
 
 ## Event based evolution
-Now we have a working Presence API. However, it is isolated whereas it would usually be used in conjonction with other backend APIs such as a friend or challenge API. Those other APIs might also be interested to know if a player has been disconnected, to perform some updates or clean up on their side. 
+Now we have a working Presence API. However, it is isolated whereas it would usually be used in conjunction with other backend APIs such as a friend or challenge API. Those other APIs might also be interested to know if a player has been disconnected, to perform some updates or clean up on their side. 
 
 Another issue with this first version is that there is two differentiated paths to disconnect the user, one using the `disconnect` **mutation** on the API, one through the `disconnected` **mutation** from the timeout function. When users disconnect themselves, other services won't be notified. To be consistent, we modify the `disconnect` function to send a disconnection event to our event bus as well. Here is the evolved architecture:
 
@@ -211,6 +211,8 @@ Another issue with this first version is that there is two differentiated paths 
 4. The event bus triggers lambda function `on_disconnect` set as target
 5. The `on_disconnect` function sends a `disconnected` mutation to AppSync
 6. AppSync notifies clients that subscribed to this mutation
+
+Also note that the `heartbeat` function is now sending **connect** events to the EventBridge bus, that can be used by other backend services as well.
 
 ### Network evolution
 One interesting point in the diagram, is that lambda functions are not directly connected to AppSync anymore, which removes the need to have private / public subnets and a NAT Gateway. And as EventBridge supports [interface VPC Endpoint](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-and-interface-VPC.html), we add one to our VPC so that Lmambda function inside the VPC can access the service directly:   

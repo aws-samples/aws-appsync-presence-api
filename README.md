@@ -29,8 +29,7 @@ Here is the architecture deployed by the CDK scripts:
 ![Architecture](blogpost/images/Presence_API_Events.png)
 
 There are two different scripts to build the stack in the `lib` folder:
-- `presence-stack.ts` describes the main stack
-- `schema.ts` describes the GraphQl schema as code first.
+- `schema.ts` describes the GraphQl schema as code first
+- `presence-stack.ts` describes the main stack, including the previous schema
 
-
-
+## Tests
