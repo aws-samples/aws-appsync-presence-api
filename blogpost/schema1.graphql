@@ -1,0 +1,32 @@
+enum Status {
+    online
+    offline
+}
+type Change {
+    id: ID!
+    status: Status!
+}
+type Mutation {
+    connect(id: ID!): Change
+    disconnect(id: ID!): Change
+}
+type Query {
+    heartbeat(id: ID!): Change
+    status(id: ID!): Change
+}
+type Subscription {
+    onStatus(id: ID!): Change
+        @aws_subscribe(mutations: ["connect","disconnect"])
+}
+
+type Mutation {
+  connect(id: ID!): Change
+  disconnect(id: ID!): Change
+  disconnected(id: ID!): Change
+    @aws_iam
+}
+...
+type Subscription {
+  onStatus(id: ID!): Change
+    @aws_subscribe(mutations: ["connect","disconnect","disconnected"])
+}

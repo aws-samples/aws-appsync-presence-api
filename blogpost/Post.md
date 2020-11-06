@@ -199,9 +199,9 @@ exports.handler =  async function() {
 Finally, in order to trigger notification in AppSync, we use a specific **mutation** named `disconnected`. This mutation is attached to a [local resolver](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-local-resolvers.html): it just forward the result of the request mapping template to the response mapping template, without leaving AppSync, while triggering notifications to subscribed clients. 
 
 ## Event based evolution
-Now we have a working Presence API. However, it is isolated whereas it would usually be used in conjunction with other backend APIs such as a friend or challenge API. Those other APIs might also be interested to know if a player has been disconnected, to perform some updates or clean up on their side. 
+Now we have a working Presence API. However, it was defined without the context of other backend APIs such as a friend or challenge API. Those other APIs might also be interested to know if a player has been disconnected, to perform some updates or clean up on their side.
 
-Another issue with this first version is that there is two differentiated paths to disconnect the user, one using the `disconnect` **mutation** on the API, one through the `disconnected` **mutation** from the timeout function. When users disconnect themselves, other services won't be notified. To be consistent, we modify the `disconnect` function to send a disconnection event to our event bus as well. Here is the evolved architecture:
+Another issue with this first version is that there are two differentiated paths to disconnect the user, one using the `disconnect` **mutation** on the API, one through the `disconnected` **mutation** from the timeout function. When users disconnect themselves, other services won't be notified. To be consistent, we modify the `disconnect` function to send a disconnection event to our event bus as well. Here is the evolved architecture:
 
 ![Architecture](images/Presence_API_Events.png)
 
@@ -227,17 +227,17 @@ this.vpc.addInterfaceEndpoint("eventsEndPoint", {
 ### Event Rules and Targets
 The next step is to define events and the rule that trigger them. The stack creates an event rule attached to the custom event bus:
 ```typescript
-    // Rule for disconnection event
-    new AwsEvents.Rule(this, "PresenceExpiredRule", {
-      eventBus: presenceBus,
-      description: "Rule for presence disconnection",
-      eventPattern: {
-        detailType: ["presence.disconnected"],
-        source: ["api.presence"]
-      },
-      targets: [new AwsEventsTargets.LambdaFunction(this.getFn("on_disconnect"))],
-      enabled: true
-    });
+// Rule for disconnection event
+new AwsEvents.Rule(this, "PresenceExpiredRule", {
+  eventBus: presenceBus,
+  description: "Rule for presence disconnection",
+  eventPattern: {
+    detailType: ["presence.disconnected"],
+    source: ["api.presence"]
+  },
+  targets: [new AwsEventsTargets.LambdaFunction(this.getFn("on_disconnect"))],
+  enabled: true
+});
 ```
 The important points here are:
 * The **eventPattern**: it defines the events that will trigger this rule, in this case all events that will have their `detailType` and `source` both match one of those in the rule definition, all other event fields are ignored.

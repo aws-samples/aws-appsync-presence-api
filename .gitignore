@@ -1,7 +1,11 @@
+# Main ignore
 *.js
 !jest.config.js
 *.d.ts
 node_modules
+
+# Lambda functions are js
+!/src/**/*.js
 
 # CDK asset staging directory
 .cdk.staging
