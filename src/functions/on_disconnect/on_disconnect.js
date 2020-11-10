@@ -31,7 +31,7 @@ const expire = gql`
 `;
 
 /**
- * Handler function to expire connections
+ * Handler function for disconnection
  * 
  */
 exports.handler =  async function(event) {
