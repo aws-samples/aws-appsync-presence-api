@@ -1,0 +1,5 @@
+{
+  "PresenceStack": {
+    "presenceapi": "https://eoypjy5pavaxjdjiqygwimet3e.appsync-api.eu-west-1.amazonaws.com/graphql"
+  }
+}

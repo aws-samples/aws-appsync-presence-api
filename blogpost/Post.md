@@ -133,7 +133,7 @@ type Mutation {
   disconnected(id: ID!): Change
     @aws_iam
 }
-...
+
 type Subscription {
 	onStatus(id: ID!): Change
 		@aws_subscribe(mutations: ["connect","disconnect","disconnected"])
@@ -283,4 +283,3 @@ You can get the full source code from the github samples here: [GITHUB REPO LINK
 ## Conclusion
 If you already have an AppSync based API for your backend, you can easily add a presence API to it with a set of simple lambda functions and a Redis Cluster. The simple version of the API could be used if there is no need to connect with or decouple it from your existing services.
 The event based version of this API allows hooking other existing services from your backend, by registering an additional target to the existing rule. As rule targets can be of [many different types](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-targets.html), including Amazon EC2 instances, Amazon ECS instances, Amazon API Gateway REST API endpoints, it could also be use to extend other kind of existing backends.
-

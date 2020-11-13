@@ -55,14 +55,14 @@ export class PresenceStack extends CDK.Stack {
   private addFunction(name: string, useRedis: boolean = true) : void {
     const props = useRedis ? {
       vpc: this.vpc,
-      vpcSubnets: this.vpc.selectSubnets({subnetGroupName: "Lambda"})
+      vpcSubnets: this.vpc.selectSubnets({subnetGroupName: "Lambda"}),
+      securityGroups: [this.lambdaSG]
     } : {};
     const fn = new Lambda.Function(this, name, {
       ...props,
       code: Lambda.Code.fromAsset(path.resolve(__dirname, `../src/functions/${name}/`)),
       runtime: Lambda.Runtime.NODEJS_12_X,
-      handler: `${name}.handler`,
-      securityGroups: [this.lambdaSG]
+      handler: `${name}.handler`
     });
     // Specific elements to add for redis access
     if (useRedis) {
@@ -207,14 +207,16 @@ export class PresenceStack extends CDK.Stack {
      * The GraphQL API
      * 
      * Default authorization is set to use API_KEY. This is good for development and test,
-     * in production, I would recommend using a COGNITO or OPEN_ID user based authentification.
+     * in production, we recommend using a COGNITO or OPEN_ID user based authentification.
      */
     this.api = new AppSync.GraphqlApi(this, "PresenceAPI", {
       name: "PresenceAPI",
       authorizationConfig: {
         defaultAuthorization: {
           authorizationType: AppSync.AuthorizationType.API_KEY,
-          apiKeyConfig: { name: "PresenceKey" }
+          apiKeyConfig: { 
+            name: "PresenceKey"
+          }
         },
         additionalAuthorizationModes: [
           { authorizationType: AppSync.AuthorizationType.IAM }
@@ -329,6 +331,16 @@ export class PresenceStack extends CDK.Stack {
       value: this.api.graphqlUrl,
       description: "Presence api endpoint",
       exportName: "presenceEndpoint"
+    });
+    new CDK.CfnOutput(this, "api-key", {
+      value: this.api.apiKey || '',
+      description: "Presence api key",
+      exportName: "apiKey"
+    });
+    new CDK.CfnOutput(this, "region", {
+      value: process.env.CDK_DEFAULT_REGION || '',
+      description: "Presence api region",
+      exportName: "region"
     });
   }
 }

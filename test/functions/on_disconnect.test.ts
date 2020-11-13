@@ -1,4 +1,4 @@
-const AppSync = require("../mocks/aws-appsync");
+import * as AppSync from "../mocks/aws-appsync";
 const on_disconnect = require("../../src/functions/on_disconnect/on_disconnect");
 jest.mock('../../src/functions/on_disconnect/node_modules/aws-appsync', () => AppSync);
 
@@ -33,10 +33,8 @@ describe("On disconnect function", () => {
     test("Returned value", async () => {
       await expect(on_disconnect.handler({detail: {id: "test_id"}}))
         .resolves.toMatchObject({id: "test_id", status:"offline"});
-      console.log(client.mutate.mock.calls);
     });
     test("AppSync called", () => {
-      console.log(client.mutate.mock.calls);
       expect(client.mutate).toHaveBeenCalledTimes(1);
     });
   });

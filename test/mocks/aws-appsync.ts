@@ -3,7 +3,6 @@
  */
 const mutateMock = jest.fn().mockImplementation(
   (data) => {
-    console.log("mutating");
     return Promise.resolve({
       data: {
         disconnected: {
@@ -19,11 +18,11 @@ enum AUTH_TYPE {
   AWS_IAM = "AWS_IAM"
 }
 
-export class AwsAppSyncClient {
+export class AppSyncClient {
   mutate = mutateMock
 }
 
-export default AwsAppSyncClient
+export default AppSyncClient
 
 export {
   AUTH_TYPE
