@@ -21,7 +21,7 @@ const config = {
 const gqlClient = new AppSyncClient(config);
 
 // Query is the same for all calls
-const expire = gql`
+const disconnected = gql`
   mutation disconnected($id: ID!) {
     disconnected(id: $id) {
       id
@@ -40,7 +40,7 @@ exports.handler =  async function(event) {
   if (undefined === id || null === id) throw new Error("Missing argument 'id'");
   try {
     const result = await gqlClient.mutate({
-      mutation: expire,
+      mutation: disconnected,
       variables: {id}
     });
     return result.data.disconnected;
