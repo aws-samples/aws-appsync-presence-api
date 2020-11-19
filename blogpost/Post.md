@@ -21,21 +21,21 @@ enum Status {
 	online
 	offline
 }
-type Change {
+type Presence {
 	id: ID!
 	status: Status!
 }
 type Mutation {
-	connect(id: ID!): Change
-	disconnect(id: ID!): Change
-  disconnected(id: ID!): Change
+	connect(id: ID!): Presence
+	disconnect(id: ID!): Presence
+  disconnected(id: ID!): Presence
 }
 type Query {
-	heartbeat(id: ID!): Change
-	status(id: ID!): Change
+	heartbeat(id: ID!): Presence
+	status(id: ID!): Presence
 }
 type Subscription {
-	onStatus(id: ID!): Change
+	onStatus(id: ID!): Presence
 		@aws_subscribe(mutations: ["connect","disconnect","disconnected"])
 }
 ```
@@ -128,14 +128,14 @@ The process of handling expired connection follows the steps annotated in the ab
 We need to modify the GraphQL schema with this additional `disconnected` **mutation**:
 ```graphql
 type Mutation {
-	connect(id: ID!): Change
-	disconnect(id: ID!): Change
-  disconnected(id: ID!): Change
+	connect(id: ID!): Presence
+	disconnect(id: ID!): Presence
+  disconnected(id: ID!): Presence
     @aws_iam
 }
 
 type Subscription {
-	onStatus(id: ID!): Change
+	onStatus(id: ID!): Presence
 		@aws_subscribe(mutations: ["connect","disconnect","disconnected"])
 }
 ```

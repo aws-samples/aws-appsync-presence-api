@@ -10,11 +10,13 @@
     "test": "tsc && jest",
     "test-stack": "tsc && jest stack",
     "test-fn": "tsc && jest functions",
+    "test-integ": "jest integration",
     "cdk": "cdk",
-    "deploy": "tsc && cdk deploy --profile gametech"
+    "deploy": "tsc && cdk deploy"
   },
   "devDependencies": {
     "@aws-cdk/assert": "^1.68.0",
+    "@types/graphql": "^14.5.0",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "@types/redis-mock": "^0.17.0",

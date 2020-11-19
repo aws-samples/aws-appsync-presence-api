@@ -37,47 +37,47 @@ export function PresenceSchema() : AppSync.Schema {
   // Directives are used to set access through IAM and API KEY
   // In production, recommendation would be to use Cognito or Open Id
   // (https://docs.aws.amazon.com/appsync/latest/devguide/security.html)
-  const change = new AppSync.ObjectType("Change", {
+  const presence = new AppSync.ObjectType("Presence", {
     definition: { 
       id: requiredId,
       status: requiredStatus
     },
     directives: [AppSync.Directive.iam(), AppSync.Directive.apiKey()]
   });
-  const returnChange = typeFromObject(change);
+  const returnPresence = typeFromObject(presence);
   
   // Add user defined types to the schema
   schema.addType(status);
-  schema.addType(change);
+  schema.addType(presence);
 
   // Add queries
   schema.addQuery("heartbeat", new AppSync.ResolvableField({
-    returnType: returnChange,
+    returnType: returnPresence,
     args: { id: requiredId }
   }));
   schema.addQuery("status", new AppSync.ResolvableField({
-    returnType: returnChange,
+    returnType: returnPresence,
     args: { id: requiredId }
   }));
 
   // Add mutations
   schema.addMutation("connect", new AppSync.ResolvableField({
-    returnType: returnChange,
+    returnType: returnPresence,
     args: { id: requiredId }
   }));
   schema.addMutation("disconnect", new AppSync.ResolvableField({
-    returnType: returnChange,
+    returnType: returnPresence,
     args: { id: requiredId }
   }));
   schema.addMutation("disconnected", new AppSync.ResolvableField({
-    returnType: returnChange,
+    returnType: returnPresence,
     args: { id: requiredId },
     directives: [AppSync.Directive.iam()]
   }));
 
   // Add subscription
   schema.addSubscription("onStatus", new AppSync.ResolvableField({
-    returnType: returnChange,
+    returnType: returnPresence,
     args: { id: requiredId },
     directives: [AppSync.Directive.subscribe("connect","disconnected")]
   }));
