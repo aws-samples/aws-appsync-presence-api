@@ -55,7 +55,7 @@ describe("API Integration test", () => {
   });
 
   describe("Notifications tests", () => {
-    const delayTime = 800; // Use delay to receive notifications
+    const delayTime = 1000; // Use delay to receive notifications
     const observePlayer1 = jest.fn( (data) => data );
     const observePlayer2 = jest.fn( (data) => data );
     const delay = () => new Promise( (resolve, reject) => { setTimeout(resolve, delayTime) } );
@@ -74,7 +74,7 @@ describe("API Integration test", () => {
     });
   
     test("Connect notification", async () => {
-      await api.connect("player1").then(delay).then(()=>{
+      await api.connect("player1").then(delay);
       expect(observePlayer1).toHaveBeenLastCalledWith(
         expect.objectContaining({
           onStatus: expect.objectContaining({
@@ -83,7 +83,6 @@ describe("API Integration test", () => {
           })
         })
       );
-      });
     });
   
     test("Disconnect notification", async () => {

@@ -2,7 +2,6 @@ require('isomorphic-fetch'); // Required for 'aws-appsync'
 
 import * as AWSAppSync from "aws-appsync";
 import gql from "graphql-tag";
-import { send } from "process";
 
 // Prepare all queries
 const presenceResult = `{
