@@ -8,16 +8,27 @@ const redisPort = process.env.REDIS_PORT;
 const presence = redis.createClient(redisPort, redisEndpoint);
 const eventBridge = new AWS.EventBridge();
 
+/**
+ * Timeout event handler
+ * 
+ * 1 - Use `multi` to chain Redis commands
+ * 2 - Commands are zrangebyscore to retrieve expired id, zremrangebyscore to remove them
+ * 3 - Send events for each ids
+ * 
+ */
 exports.handler =  async function() {
   const timestamp = Date.now() - timeout;
-  const transaction = presence.multi();
-  transaction.zrangebyscore("presence", "-inf", timestamp);
-  transaction.zremrangebyscore("presence", "-inf", timestamp);
-  const execute = promisify(transaction.exec).bind(transaction);
+  const commands = presence.multi();
+  commands.zrangebyscore("presence", "-inf", timestamp);
+  commands.zremrangebyscore("presence", "-inf", timestamp);
+  const execute = promisify(commands.exec).bind(commands);
   try {
+    // Multiple commands results are returned as an array of result, one entry per command
+    // ids list is the result of the first command
     const [ids] = await execute();
     if (!ids.length) return { expired: 0 };
-    // putEvents: limited to 10 events per call...
+    // putEvents is limited to 10 events per call
+    // Create a promise for each batch of ten events ...
     let promises = [];
     while ( ids.length ) {
       const Entries = ids.splice(0, 10).map( (id) => {
@@ -31,7 +42,9 @@ exports.handler =  async function() {
       });
       promises.push(eventBridge.putEvents({ Entries }).promise());
     }
+    // ... and await for all promises to return
     const results = await Promise.all(promises);
+    // Sum results for all promises and return
     const failed = results.reduce(
       (sum, result) => sum + result.FailedEntryCount,
       0

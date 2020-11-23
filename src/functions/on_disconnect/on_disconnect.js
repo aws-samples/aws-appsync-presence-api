@@ -1,3 +1,9 @@
+/**
+ * The `on_disconnect` function requires an AppSync client
+ * It is installed as node modules within its own folder
+ * 
+ * Make sure `npm install` was run in this folder
+ */
 require('isomorphic-fetch'); // Required for 'aws-appsync'
 const AWS = require('aws-sdk/global');
 const AppSync = require('aws-appsync');
@@ -8,7 +14,7 @@ const gql = require('graphql-tag');
 // Retrieve environment value
 const graphqlEndpoint = process.env.GRAPHQL_ENDPOINT;
 
-// Initialize GraphQL clients
+// Initialize GraphQL client with IAM credentials
 const config = {
   url: graphqlEndpoint,
   region: process.env.AWS_REGION,
@@ -33,6 +39,10 @@ const disconnected = gql`
 /**
  * Handler function for disconnection
  * 
+ * 1 - Check `arguments.id` from the event
+ * 2 - Call the `disconnected` mutation on AppSync client
+ * 
+ * @param {*} event
  */
 exports.handler =  async function(event) {
   // Simply call graphql mutation

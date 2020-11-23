@@ -10,7 +10,10 @@ const eventBus = process.env.EVENT_BUS;
 
 /**
  * Heartbeat handler:
- * use zadd on the redis sorted set to add one entry
+ * 
+ * 1 - Check `arguments.id` from the event
+ * 2 - Use zadd to add or update the timestamp
+ * 3 - If the timestamp was added, send a connection event
  * 
  * @param {object} event 
  */
@@ -22,7 +25,7 @@ exports.handler =  async function(event) {
     const result = await zadd("presence", timestamp, id);
     if (result === 1 ) // New connection
     {
-      const result = await eventBridge.putEvents({
+      await eventBridge.putEvents({
         Entries: [{
           Detail: JSON.stringify({id}),
           DetailType: "presence.connected",

@@ -36,6 +36,11 @@ There are two different scripts to build the stack in the `lib` folder:
 
 Use either `npm run deploy` or `cdk deploy` to deploy the infrastructure in your account. The second command assumes you have built the typescript files before running it.
 
+## Lambda functions
+The source code of the Lambda functions is stored in subfolders of the `src` folder. The functions are written in plain Javascript instead of Typescript for simplicity: using Typescript would require an additional build step for the assets.
+The `src` folder also contains a `layer` subfolder with the common modules used by most of the functions to access the Redis cluster.
+The `on_disconnect` function includes its own node modules as it's the only one accessing the AppSync api.
+
 ## Tests
 There are some tests available in the `/test` subfolder, mostly given out as example. They are not intented for full coverage of the code. They are build using the [Jest](https://jestjs.io/en/) framework. This subfolder also contains a `mock` to gather simple mocking implementations of some AWS services (such as AppSync) used for unit tests. The three type of tests are:
 - **stack**: test the stack output from the CDK commands.
@@ -45,4 +50,4 @@ There are some tests available in the `/test` subfolder, mostly given out as exa
 The `integration` test subfolder also contains an `apiclient` that is a sample implementation of the presence API.
 
 > Regarding the integration test, the notification tests are relying on some `delay` to make sure the notifications are sent back. You can modify the `delayTime` value inside the code in case some tests fail to check if it's due to network latency.
-> Running the integration tests, the **jest CLI** might display an error due to *asynchronous operations that weren't stopped*. The `aws-appsync` npm library currently does not seem to provide a way to close the client.
+> Running the integration tests, the **jest CLI** might display an error due to *asynchronous operations that weren't stopped*. The `aws-appsync` library does not provide a function to close its connection to the API, the connection being closed after some idle time.

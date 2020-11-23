@@ -12,7 +12,7 @@
     "test-fn": "jest functions",
     "test-integ": "jest integration",
     "cdk": "cdk",
-    "deploy": "tsc && cdk deploy"
+    "deploy": "tsc && cdk deploy --outputs-file presence.json"
   },
   "devDependencies": {
     "@aws-cdk/assert": "^1.68.0",

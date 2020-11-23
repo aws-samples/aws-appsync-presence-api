@@ -9,7 +9,7 @@ import * as AppSync from '@aws-cdk/aws-appsync';
  * Helper function to define a GraphQl Type from an intermediate type.
  * 
  * @param intermediateType the intermediate type this type derives from
- * @param options options like isRequired, isList, isRequiredList
+ * @param options possible values are `isRequired`, `isList`, `isRequiredList`
  */
 function typeFromObject( intermediateType: AppSync.IIntermediateType, options?: AppSync.GraphqlTypeOptions ) : AppSync.GraphqlType {
   return AppSync.GraphqlType.intermediate({ intermediateType, ...options });
@@ -28,11 +28,12 @@ export function PresenceSchema() : AppSync.Schema {
   // A Required ID type ("ID!")
   const requiredId = AppSync.GraphqlType.id({isRequired: true});
 
-  // User defined types: enum for presence state, and required version
+  // User defined types: enum for presence state, and required version (i.e. "status!")
   const status = new AppSync.EnumType("Status", {
     definition: ["online", "offline"]
   });
   const requiredStatus = typeFromObject(status, {isRequired: true});
+  
   // Main type returned by API calls:
   // Directives are used to set access through IAM and API KEY
   // In production, recommendation would be to use Cognito or Open Id
