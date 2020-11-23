@@ -51,25 +51,25 @@ describe("Checking GraphQL schema", () => {
       offline
     }`));
 
-  test("Change type", testNoSpaces(`type Change @aws_iam @aws_api_key {
+  test("Presence type", testNoSpaces(`type Presence @aws_iam @aws_api_key {
     id: ID!
     status: Status!
   }`));
 
   test("Queries", testNoSpaces(`type Query {
-    heartbeat(id: ID!): Change
-    status(id: ID!): Change
+    heartbeat(id: ID!): Presence
+    status(id: ID!): Presence
   }`));
   
   test("Mutations", testNoSpaces(`type Mutation {
-    connect(id: ID!): Change
-    disconnect(id: ID!): Change
-    disconnected(id: ID!): Change
+    connect(id: ID!): Presence
+    disconnect(id: ID!): Presence
+    disconnected(id: ID!): Presence
     @aws_iam
   }`));
 
   test("Subscriptions", testNoSpaces(`type Subscription {
-    onStatus(id: ID!): Change
+    onStatus(id: ID!): Presence
     @aws_subscribe(mutations: [\"connect\", \"disconnected\"])
   }`));
 

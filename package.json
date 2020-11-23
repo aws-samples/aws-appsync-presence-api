@@ -7,9 +7,9 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "tsc && jest",
-    "test-stack": "tsc && jest stack",
-    "test-fn": "tsc && jest functions",
+    "test": "jest",
+    "test-stack": "jest stack",
+    "test-fn": "jest functions",
     "test-integ": "jest integration",
     "cdk": "cdk",
     "deploy": "tsc && cdk deploy"

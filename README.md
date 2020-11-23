@@ -41,3 +41,8 @@ There are some tests available in the `/test` subfolder, mostly given out as exa
 - **stack**: test the stack output from the CDK commands.
 - **functions**: unit tests to test the lambda functions handler mainly.
 - **integration**: integration tests that can be run against a test or staging environment
+
+The `integration` test subfolder also contains an `apiclient` that is a sample implementation of the presence API.
+
+> Regarding the integration test, the notification tests are relying on some `delay` to make sure the notifications are sent back. You can modify the `delayTime` value inside the code in case some tests fail to check if it's due to network latency.
+> Running the integration tests, the **jest CLI** might display an error due to *asynchronous operations that weren't stopped*. The `aws-appsync` npm library currently does not seem to provide a way to close the client.
