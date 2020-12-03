@@ -55,10 +55,6 @@ class Api {
     if (!Api._client) Api._client = Api.initClient();
   }
 
-  destroy() {
-    delete Api._client;
-  }
-
   static getConfig() {
     return this._stackOutput;
   }
