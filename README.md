@@ -1,4 +1,4 @@
-# Presence API using Amazon AppSync, AWS Lambda, Amazon Elasticache and EventBridge
+# Presence API using AWS AppSync, AWS Lambda, Amazon Elasticache and Amazon EventBridge
 
 This repository contains code to deploy a Presence API using AWS AppSync, AWS Lambda, Amazon Elasticache and Amazon EventBridge. The main purpose is to give an example of API developement using those elements, and it is kept as simple as possible.   
 Presence APIs are often used for game backend, their main goal is to maintain player's connection state: offline or online as they connect or disconnect to the back end. In this case, it is also built to notify clients in real time about changes in connection states. And finally, in order to be extended or integrated with other possible backend services, it uses an **Event Sourcing** pattern for communication.
