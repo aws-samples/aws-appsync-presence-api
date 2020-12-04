@@ -74,7 +74,7 @@ The `presencedemo` folder contains the code of a small web site to demonstrate u
 1. Install dependencies
   The website uses the `aws-amplify` modules, and more precisely the `@aws-amplify/api` one to call the AWS AppSync GraphQL endpoint. Launch the `npm install` command in the folder to install them.
 2. Configure the API
-  Open the `src/api-config.js` file and modify the configuration using information that can be found in the `presence.json` file created when deploying the CDK stack:
+  Create a file called `api-config.js` in the `presencedemo/src` folder, copy the content from the `api-config.sample.js` file located in the same folder, and then modify the configuration using information that can be found in the `presence.json` file created when deploying the CDK stack:
   ```javascript
   export default {
     'aws_appsync_graphqlEndpoint': 'https://**************************.appsync-api.**-****-*.amazonaws.com/graphql', // <-- Your endpoint

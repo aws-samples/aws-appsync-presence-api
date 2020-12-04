@@ -15,7 +15,7 @@ template.yaml
 
 # Do not update the config files
 /presence.json
-
+/presencedemo/src/api-config.js
 
 # Parcel default cache directory
 .parcel-cache
