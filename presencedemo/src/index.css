@@ -1,0 +1,38 @@
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+
+#app .logo {
+  height: 20%;
+  width: 20%;
+}
+
+#app .footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+
+#app .center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#app .online {
+  color: green;
+}
+
+#app .offline {
+  color: red;
+}
+
+#app .remote {
+  color: blue;
+}

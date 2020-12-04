@@ -1,6 +1,6 @@
 # Presence API using Amazon AppSync, AWS Lambda, Amazon Elasticache and EventBridge
 
-This repository contains code to deploy a Presence API using Amazon AppSync, AWS Lambda, Amazon Elasticache and Amazon EventBridge. The main purpose is to give an example of API developement using those elements, and it is kept as simple as possible.   
+This repository contains code to deploy a Presence API using AWS AppSync, AWS Lambda, Amazon Elasticache and Amazon EventBridge. The main purpose is to give an example of API developement using those elements, and it is kept as simple as possible.   
 Presence APIs are often used for game backend, their main goal is to maintain player's connection state: offline or online as they connect or disconnect to the back end. In this case, it is also built to notify clients in real time about changes in connection states. And finally, in order to be extended or integrated with other possible backend services, it uses an **Event Sourcing** pattern for communication.
 
 You can also find more details on the infrastructure in the [associated blog post](./blogpost/Post.md).
@@ -51,6 +51,8 @@ There are two different scripts to build the stack in the `lib` folder:
 
 Use either `npm run deploy` or `cdk deploy` to deploy the infrastructure in your account. The second command assumes you have built the typescript files before running it.
 
+Once the deployment is ready, the `npm run deploy` command includes the `--outputs-file presence.json` option, which will contain the necessary information to access the GraphQL API endpoint.
+
 ## Lambda functions
 The source code of the Lambda functions is stored in subfolders of the `src` folder. The functions are written in plain Javascript instead of Typescript for simplicity: using Typescript would require an additional build step for the assets.
 The `src` folder also contains a `layer` subfolder with the common modules used by most of the functions to access the Redis cluster.
@@ -66,3 +68,34 @@ The `integration` test subfolder also contains an `apiclient` that is a sample i
 
 > Regarding the integration test, the notification tests are relying on some `delay` to make sure the notifications are sent back. You can modify the `delayTime` value inside the code in case some tests fail to check if it's due to network latency.
 > Running the integration tests, the **jest CLI** might display an error due to *asynchronous operations that weren't stopped*. The `aws-appsync` library does not provide a function to close its connection to the API, the connection being closed after some idle time.
+
+## Presence Demo
+The `presencedemo` folder contains the code of a small web site to demonstrate usage of the API. The website is developed using [Vue.js](https://v3.vuejs.org/). As a prerequisite, the [Vue CLI](https://cli.vuejs.org/guide/installation.html) should be installed in your environment. You can test it locally following those steps:
+1. Install dependencies
+  The website uses the `aws-amplify` modules, and more precisely the `@aws-amplify/api` one to call the AWS AppSync GraphQL endpoint. Launch the `npm install` command in the folder to install them.
+2. Configure the API
+  Open the `src/api-config.js` file and modify the configuration using information that can be found in the `presence.json` file created when deploying the CDK stack:
+  ```javascript
+  export default {
+    'aws_appsync_graphqlEndpoint': 'https://**************************.appsync-api.**-****-*.amazonaws.com/graphql', // <-- Your endpoint
+    'aws_appsync_region': 'eu-west-1', // <-- Your region
+    'aws_appsync_authenticationType': 'API_KEY',
+    'aws_appsync_apiKey': 'da2-**************************', // <-- Your API Key for test
+  }
+  ```
+3. Run the local server
+  You can launch the local server using the `npm run serve` command in the demo folder. It should make the web site available locally through an URL like `http://localhost:8080/`. 
+
+To test it, you can open multiple browser windows, and add players. Each time you add one player, the page will first get the player status, and then subscribe to status notifications for this player id.
+
+![Demo1](blogpost/images/demo1.png)
+
+If you click **connect** for one of the players in a window, it will appear **online** and start sending heartbeat, once every 10 seconds. It should also appear as **online (remote)** on the other windows.
+
+![Demo2](blogpost/images/demo2.png)
+
+You can then click **disconnect** to disconnect the user: it might appear as **online (remote)** for a very short time before the page receives the status change notification, and propagate to other opened pages.
+
+If you click on **Stop heartbeat**, the page will stop sending heartbeats for this player. This allows testing the timeout functions, after some time, the opened pages should receive the notification of the disconnection and swith the status back to **online**.
+
+If you want to see how the API is called and used, the corresponding code is within the `src/components/Player.vue` file.

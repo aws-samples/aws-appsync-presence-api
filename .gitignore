@@ -12,5 +12,8 @@ node_modules
 cdk.out
 template.yaml
 
+# Do not update the config files
+
+
 # Parcel default cache directory
 .parcel-cache
