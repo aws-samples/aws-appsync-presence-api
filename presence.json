@@ -1,7 +1,0 @@
-{
-  "PresenceStack": {
-    "apikey": "da2-**************************",
-    "presenceapi": "https://**************************.appsync-api.**-****-*.amazonaws.com/graphql",
-    "region": "eu-west-1"
-  }
-}
