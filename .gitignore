@@ -4,8 +4,9 @@
 *.d.ts
 node_modules
 
-# Lambda functions are js
+# Keep js files for lambda and demo
 !/src/**/*.js
+!/presencedemo/**/*.js
 
 # CDK asset staging directory
 .cdk.staging
@@ -14,7 +15,6 @@ template.yaml
 
 # Do not update the config files
 /presence.json
-presencedemo/src/api-config.js
 
 
 # Parcel default cache directory
