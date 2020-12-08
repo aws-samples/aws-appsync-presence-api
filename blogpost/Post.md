@@ -1,4 +1,4 @@
-# Building a Presence API using Amazon AppSync, AWS Lambda and Amazon Elasticache
+# Building a Presence API using Amazon AppSync, AWS Lambda, Amazon Elasticache and Amazon Eventbridge
 
 ## Introduction
 When developing a video game, whether a single player or multiplayer one, social and competitive features help create a network effect and increase players' engagement. These features usually require a backend API. Among them, presence information let players know about online status changes of other players, to be able to challenge them quickly, or invite them for a game session.
