@@ -3,6 +3,7 @@
 !jest.config.js
 *.d.ts
 node_modules
+.DS_Store
 
 # Keep js files for lambda and demo
 !/src/**/*.js
