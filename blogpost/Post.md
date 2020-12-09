@@ -1,4 +1,4 @@
-# Building a Presence API using AWS AppSync, AWS Lambda, Amazon Elasticache and Amazon Eventbridge
+# Building a Presence API using AWS AppSync, AWS Lambda, Amazon Elasticache and Amazon EventBridge
 
 ## Introduction
 When developing a video game, whether a single player or multiplayer one, social and competitive features help create a network effect and increase players' engagement. These features usually require a backend API. Among them, presence information let players know about online status changes of other players, to be able to challenge them quickly, or invite them for a game session.
@@ -205,17 +205,17 @@ Another issue with this first version is that there are two differentiated paths
 
 ![Architecture](images/Presence_API_Events.png)
 
-1. EventBridge triggers the `timeout` function
+1. Amazon EventBridge triggers the `timeout` function
 2. The function retrieves and removes expired connections
 3. The function sends events to the custom event bus (as the `disconnect` function does too)
 4. The event bus triggers lambda function `on_disconnect` set as target
 5. The `on_disconnect` function sends a `disconnected` mutation to AppSync
 6. AppSync notifies clients that subscribed to this mutation
 
-Also note that the `heartbeat` function is now sending **connect** events to the EventBridge bus, that can be used by other backend services as well.
+Also note that the `heartbeat` function is now sending **connect** events to the Amazon EventBridge bus, that can be used by other backend services as well.
 
 ### Network evolution
-One interesting point in the diagram, is that lambda functions are not directly connected to AppSync anymore, which removes the need to have private / public subnets and a NAT Gateway. And as EventBridge supports [interface VPC Endpoint](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-and-interface-VPC.html), we add one to our VPC so that Lmambda function inside the VPC can access the service directly:   
+One interesting point in the diagram, is that lambda functions are not directly connected to AppSync anymore, which removes the need to have private / public subnets and a NAT Gateway. And as Amazon EventBridge supports [interface VPC Endpoint](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-and-interface-VPC.html), we add one to our VPC so that Lmambda function inside the VPC can access the service directly:   
 ```typescript
 // Add an interface endpoint for EventBus
 this.vpc.addInterfaceEndpoint("eventsEndPoint", {
@@ -242,9 +242,9 @@ new AwsEvents.Rule(this, "PresenceExpiredRule", {
 The important points here are:
 * The **eventPattern**: it defines the events that will trigger this rule, in this case all events that will have their `detailType` and `source` both match one of those in the rule definition, all other event fields are ignored.
 * The **targets**: the `on_disconnect` function is added as a target to the rule.
-EventBridge rules allow for multiple targets to be triggered by a single rule, which will allow the usage of a fan-out model, where the event can trigger other target for other services.   
+Amazon EventBridge rules allow for multiple targets to be triggered by a single rule, which will allow the usage of a fan-out model, where the event can trigger other target for other services.   
 
-What remains to do is to change the code of our `timeout` and `disconnect` functions to send events to EventBridge. Here is the main handler for the `timeout` function as an example:
+What remains to do is to change the code of our `timeout` and `disconnect` functions to send events to Amazon EventBridge. Here is the main handler for the `timeout` function as an example:
 ```javascript
 exports.handler =  async function() {
   const timestamp = Date.now() - timeout;
