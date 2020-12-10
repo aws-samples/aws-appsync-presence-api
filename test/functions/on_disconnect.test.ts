@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 import * as AppSync from "../mocks/aws-appsync";
 const on_disconnect = require("../../src/functions/on_disconnect/on_disconnect");
 jest.mock('../../src/functions/on_disconnect/node_modules/aws-appsync', () => AppSync);

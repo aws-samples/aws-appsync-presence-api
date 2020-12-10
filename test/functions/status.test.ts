@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 import { promisify } from "util";
 const redis = require('redis-mock');
 const status = require("../../src/functions/status/status");

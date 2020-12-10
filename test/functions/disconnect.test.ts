@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 import { promisify } from "util";
 import * as AWS from "../mocks/aws-sdk";
 const redis = require('redis-mock');
