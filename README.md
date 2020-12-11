@@ -22,7 +22,7 @@ $ cd ../../functions/on_disconnect && npm install
 ```
 > The AWS Cloud Development Kit is currently still being updated frequently, and new versions sometimes introduce breaking changes. The last version tested for this repository is `1.68.0`.
 
-> If you haven't use the AWS CDK yet, you might to *bootstrap* your environment by running the `cdk bootstrap` command in your account and region. See [bootstrapping](https://docs.aws.amazon.com/cdk/latest/guide/bootstrapping.html) in the CDK documentation for more details.
+> If you haven't use the AWS CDK yet, you might need to *bootstrap* your environment by running the `cdk bootstrap` command in your account and region. See [bootstrapping](https://docs.aws.amazon.com/cdk/latest/guide/bootstrapping.html) in the CDK documentation for more details.
 
 Along with the typescript `npm run build` and `npm run watch` commands (see: [Working with the AWS CDK in TypeScript](https://docs.aws.amazon.com/cdk/latest/guide/work-with-cdk-typescript.html)), the npm package comes with a few additional commands :
 - `npm run deploy`: launches the build command (typescript transpilation) followed by the `cdk deploy` command.
