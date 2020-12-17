@@ -102,3 +102,12 @@ You can then click **disconnect** to disconnect the user: it might appear as **o
 If you click on **Stop heartbeat**, the page will stop sending heartbeats for this player. This allows testing the timeout functions, after some time, the opened pages should receive the notification of the disconnection and swith the status back to **online**.
 
 If you want to see how the API is called and used, the corresponding code is within the `src/components/Player.vue` file.
+
+## Security
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+## License
+
+This library is licensed under the MIT-0 License. See the LICENSE file.
+
