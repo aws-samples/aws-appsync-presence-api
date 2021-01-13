@@ -70,32 +70,32 @@ export function PresenceSchema() : AppSync.Schema {
   schema.addType(presence);
 
   // Add queries
-  schema.addQuery("heartbeat", new AppSync.ResolvableField({
+  schema.addQuery("heartbeat", new AppSync.Field({
     returnType: returnPresence,
     args: { id: requiredId }
   }));
-  schema.addQuery("status", new AppSync.ResolvableField({
+  schema.addQuery("status", new AppSync.Field({
     returnType: returnPresence,
     args: { id: requiredId }
   }));
 
   // Add mutations
-  schema.addMutation("connect", new AppSync.ResolvableField({
+  schema.addMutation("connect", new AppSync.Field({
     returnType: returnPresence,
     args: { id: requiredId }
   }));
-  schema.addMutation("disconnect", new AppSync.ResolvableField({
+  schema.addMutation("disconnect", new AppSync.Field({
     returnType: returnPresence,
     args: { id: requiredId }
   }));
-  schema.addMutation("disconnected", new AppSync.ResolvableField({
+  schema.addMutation("disconnected", new AppSync.Field({
     returnType: returnPresence,
     args: { id: requiredId },
     directives: [AppSync.Directive.iam()]
   }));
 
   // Add subscription
-  schema.addSubscription("onStatus", new AppSync.ResolvableField({
+  schema.addSubscription("onStatus", new AppSync.Field({
     returnType: returnPresence,
     args: { id: requiredId },
     directives: [AppSync.Directive.subscribe("connect","disconnected")]
