@@ -21,7 +21,7 @@
     "@types/node": "10.17.27",
     "@types/redis-mock": "^0.17.0",
     "aws-appsync": "^4.0.1",
-    "aws-cdk": "^1.68.0",
+    "aws-cdk": "^1.174.0",
     "aws-sdk": "^2.772.0",
     "graphql-tag": "^2.11.0",
     "isomorphic-fetch": "^3.0.0",
