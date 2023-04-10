@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-appsync": "^4.0.1",
+    "aws-appsync": "^4.1.9",
     "graphql-tag": "^2.11.0",
     "isomorphic-fetch": "^3.0.0"
   },
